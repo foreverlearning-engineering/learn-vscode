@@ -5,7 +5,7 @@ import assert from 'node:assert/strict';
 import { readSettings } from '../src/settings.ts';
 import { checkKey, redact } from '../src/keyInput.ts';
 import { encode, handoffAddress, LineReader, MAX_LINE, parseConfig, parseHello, tokensMatch, type HandoffConfig } from '../src/protocol.ts';
-import { applyConfig, captureInherited } from '../src/server/env.ts';
+import { applyConfig, captureInherited, setKeyHelp } from '../src/server/env.ts';
 import { forwardingProblems, serverLaunch } from '../src/definition.ts';
 import { ENV_HANDOFF, ENV_TOKEN, PRODUCTION_BASE_URL, STAGING_BASE_URL } from '../src/constants.ts';
 
@@ -101,6 +101,23 @@ test('server environment: with no key anywhere, the key is absent, never empty',
   assert.equal('FOREVERLEARNING_ASSIGNMENT_ID' in env, false);
   assert.equal('LEARN_MCP_PROJECT' in env, false);
   assert.equal(env.FOREVERLEARNING_BASE_URL, PRODUCTION_BASE_URL);
+});
+
+test('the no-key words: "Learn: Set API key", a restart only when VS Code could not be reached, and a developer\'s own words kept', () => {
+  const connected: NodeJS.ProcessEnv = {};
+  setKeyHelp(connected, 'connected');
+  assert.match(connected.LEARN_MCP_KEY_HELP!, /runs "Learn: Set API key" from the Command Palette/);
+  assert.match(connected.LEARN_MCP_KEY_HELP!, /picks it up at once, with no restart\.$/);
+  const unreachable: NodeJS.ProcessEnv = {};
+  setKeyHelp(unreachable, 'unreachable');
+  assert.match(unreachable.LEARN_MCP_KEY_HELP!, /could not reach VS Code .* restart the Learn API server \(MCP: List Servers\)\.$/);
+  const outside: NodeJS.ProcessEnv = {};
+  setKeyHelp(outside, 'none');
+  assert.equal('LEARN_MCP_KEY_HELP' in outside, false, "started outside the extension, learn-mcp's own words stand");
+  const own: NodeJS.ProcessEnv = { LEARN_MCP_KEY_HELP: 'Mine.' };
+  setKeyHelp(own, 'connected');
+  assert.equal(own.LEARN_MCP_KEY_HELP, 'Mine.');
+  for (const env of [connected, unreachable]) assert.ok(!env.LEARN_MCP_KEY_HELP!.includes('—') && env.LEARN_MCP_KEY_HELP!.length < 1000);
 });
 
 test('definition: the editor runtime, the bundled server, and only the handoff in its environment', () => {

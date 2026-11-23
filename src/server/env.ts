@@ -33,6 +33,18 @@ function put(env: NodeJS.ProcessEnv, name: string, value: string | null): void {
   else delete env[name];
 }
 
+// What learn-mcp tells the assistant when no key is set (LEARN_MCP_KEY_HELP replaces its
+// "set FOREVERLEARNING_API_KEY and restart" paragraph). It depends on whether this run reached
+// the extension. A developer's own LEARN_MCP_KEY_HELP is kept.
+export function setKeyHelp(env: NodeJS.ProcessEnv, handoff: 'connected' | 'unreachable' | 'none'): void {
+  if ((env.LEARN_MCP_KEY_HELP ?? '').trim() !== '' || handoff === 'none') return;
+  const how = 'In VS Code, the developer runs "Learn: Set API key" from the Command Palette and pastes their server key from My APIs in the developer console. '
+    + 'VS Code keeps it in its secret storage.';
+  env.LEARN_MCP_KEY_HELP = handoff === 'connected'
+    ? how + ' This server picks it up at once, with no restart.'
+    : how + ' This run of the server could not reach VS Code to receive a saved key, so if one is already saved, restart the Learn API server (MCP: List Servers).';
+}
+
 export function applyConfig(env: NodeJS.ProcessEnv, inherited: Inherited, config: HandoffConfig): void {
   const ownSetup = !config.key && inherited.key !== '';
   if (ownSetup) {

@@ -5,7 +5,7 @@ import { serveStdio } from '@modelcontextprotocol/server/stdio';
 import { createLearnServer } from '@foreverlearning/learn-mcp';
 import { ENV_HANDOFF, ENV_TOKEN } from '../constants.ts';
 import { redact } from '../keyInput.ts';
-import { applyConfig, captureInherited } from './env.ts';
+import { applyConfig, captureInherited, setKeyHelp } from './env.ts';
 import { connectHandoff } from './handoffClient.ts';
 
 declare const __LEARN_MCP_VERSION__: string;
@@ -25,6 +25,7 @@ const connected = address && token
     if (updates++ > 0) log('learn-vscode: settings updated from VS Code; ' + (process.env.FOREVERLEARNING_API_KEY ? 'key set' : 'no key: docs only'));
   })
   : false;
+setKeyHelp(process.env, connected ? 'connected' : address ? 'unreachable' : 'none');
 
 serveStdio(() => createLearnServer({ mode: 'full', env: process.env }), {
   onerror: (error) => log('learn-mcp: ' + String((error as Error)?.message ?? error)),

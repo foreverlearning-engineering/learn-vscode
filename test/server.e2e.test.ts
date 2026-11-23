@@ -101,7 +101,9 @@ test('the server runs with the editor runtime and serves the docs and prompts wi
   assert.match((await s.call('learn_guide', { topic: 'turn' })).text, /Send a turn/);
 
   const turn = await s.call('learn_test_turn', { message: 'I am stuck on 3x + 5 = 20.', confirm: true });
-  assert.match(turn.text, /No Learn API key is set/);
+  assert.match(turn.text, /^No Learn API key is set/);
+  assert.match(turn.text, /runs "Learn: Set API key" from the Command Palette.*picks it up at once, with no restart\. Never paste the key into the conversation\./s, 'the VS Code way to add a key');
+  assert.doesNotMatch(turn.text, /in the environment this server runs in/);
   assert.equal(mock.requests.length, 0, 'nothing reached the API');
   assert.equal(handoff.connected(), 1);
   await s.close();
@@ -149,7 +151,9 @@ test('a server with the wrong token gets nothing, and still serves the docs', as
   const s = await start({ launch });
   await s.logged(/VS Code could not be reached, so its saved key is not used, no key: docs only/);
   assert.equal(handoff.connected(), 0);
-  assert.match((await s.call('learn_test_turn', { message: 'hi', confirm: true })).text, /No Learn API key is set/);
+  const unreachable = (await s.call('learn_test_turn', { message: 'hi', confirm: true })).text;
+  assert.match(unreachable, /^No Learn API key is set/);
+  assert.match(unreachable, /could not reach VS Code .* restart the Learn API server/s);
   assert.match((await s.call('learn_kits')).text, /01-first-tutor/);
   assert.equal(mock.requests.length, 0);
   await s.close();
@@ -162,7 +166,7 @@ test('a server started from a stale cached definition (no handoff listening) sti
   const s = await start({ launch });
   await s.logged(/could not be reached/);
   assert.match((await s.call('learn_kits')).text, /01-first-tutor/);
-  assert.match((await s.call('learn_test_turn', { message: 'hi', confirm: true })).text, /No Learn API key is set/);
+  assert.match((await s.call('learn_test_turn', { message: 'hi', confirm: true })).text, /No Learn API key is set.*restart the Learn API server/s);
   await s.close();
 });
 
