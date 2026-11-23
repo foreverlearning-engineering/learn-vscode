@@ -25,13 +25,21 @@ exports.run = async function run() {
     const ours = ['learn.setApiKey', 'learn.removeApiKey', 'learn.openQuickStart', 'learn.copyFirstTutorPrompt'];
     step('its four commands are registered', ours.every((c) => commands.includes(c)), ours.filter((c) => !commands.includes(c)).join(', '));
 
-    await vscode.commands.executeCommand('workbench.mcp.startServer', SERVER_ID, { waitForLiveTools: true });
+    // VS Code adds a provider's servers to its list on a 500 ms timer (McpService.updateCollectedServers),
+    // so a start right after activation can find no server yet. Start again until the tools appear.
+    const learnTools = () => vscode.lm.tools.filter((t) => /learn_(kits|kit|guide|contract|starter_file|test_turn|lookup_request)$/.test(t.name));
     let tools = [];
-    for (let i = 0; i < 150 && tools.length < 7; i++) {
-      tools = vscode.lm.tools.filter((t) => /learn_(kits|kit|guide|contract|starter_file|test_turn|lookup_request)$/.test(t.name));
-      if (tools.length < 7) await sleep(200);
+    const startedAt = Date.now();
+    for (let attempt = 1; attempt <= 40 && tools.length < 7; attempt++) {
+      await vscode.commands.executeCommand('workbench.mcp.startServer', SERVER_ID, { waitForLiveTools: true });
+      tools = learnTools();
+      if (tools.length < 7) await sleep(500);
     }
-    step('VS Code started the server and lists its 7 tools', tools.length === 7, tools.map((t) => t.name).join(', '));
+    step('VS Code started the server and lists its 7 tools', tools.length === 7,
+      tools.length ? tools.map((t) => t.name).join(', ') + ' (after ' + ((Date.now() - startedAt) / 1000).toFixed(1) + ' s)'
+        : 'none after ' + ((Date.now() - startedAt) / 1000).toFixed(0) + ' s; VS Code lists ' + vscode.lm.tools.length + ' tools: '
+          + vscode.lm.tools.map((t) => t.name).filter((n) => /mcp|learn/i.test(n)).slice(0, 20).join(', '));
+    if (tools.length < 7) throw new Error('the Learn tools never appeared');
 
     const kits = tools.find((t) => t.name.endsWith('learn_kits'));
     const kitsText = textOf(await vscode.lm.invokeTool(kits.name, { input: {}, toolInvocationToken: undefined }));

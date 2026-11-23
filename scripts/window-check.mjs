@@ -106,7 +106,17 @@ for (const dir of existsSync(storage) ? readdirSync(storage) : []) {
     }
   }
 }
-if (!cached) console.log('note: VS Code cached no Learn definition in this run');
+if (!cached) console.log('note: no cached definition to read. VS Code keeps all storage in memory during extension tests ("no storage during extension tests!", storageMainService.ts), so this needs a normal window.');
+
+// The server's own log in VS Code (its stderr and VS Code's notes on starting it), key-shaped text hidden.
+const logs = join(data, 'logs');
+const serverLogs = [];
+const findLogs = (dir) => { for (const e of readdirSync(dir, { withFileTypes: true })) { const p = join(dir, e.name); if (e.isDirectory()) findLogs(p); else if (/^mcpServer\..*learn-api/i.test(e.name)) serverLogs.push(p); } };
+if (existsSync(logs)) findLogs(logs);
+for (const file of serverLogs) {
+  const lines = hide(readFileSync(file, 'utf8')).replace(/fl_(live|stag|test)_\w+/gi, '<key>').trim().split(/\r?\n/).filter(Boolean);
+  console.log('server log (' + lines.length + ' lines), last lines:\n     ' + (lines.slice(-12).join('\n     ') || '(empty)'));
+}
 
 // The key, if one was in this environment, appears in no file of the profile.
 if (key) {
