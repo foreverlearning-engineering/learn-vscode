@@ -1,0 +1,137 @@
+{
+  "name": "learn-api",
+  "displayName": "Learn API",
+  "description": "Add a tutor that teaches to your app with the Learn API. Your coding assistant gets the guide, the contract and the verified kits, plus a test turn with your own key.",
+  "version": "0.1.0",
+  "publisher": "foreverlearning",
+  "license": "MIT",
+  "type": "module",
+  "icon": "media/icon.png",
+  "galleryBanner": {
+    "color": "#0f3b40",
+    "theme": "dark"
+  },
+  "homepage": "https://learn.foreverlearning.ai/build/quick-start/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/foreverlearning-engineering/learn-vscode.git"
+  },
+  "bugs": {
+    "email": "developers@foreverlearning.ai"
+  },
+  "pricing": "Free",
+  "categories": [
+    "AI",
+    "Chat",
+    "Education"
+  ],
+  "keywords": [
+    "AI tutor",
+    "tutor",
+    "tutoring",
+    "education",
+    "edtech",
+    "learning",
+    "MCP",
+    "Model Context Protocol",
+    "Learn API",
+    "agent"
+  ],
+  "engines": {
+    "vscode": "^1.101.0"
+  },
+  "main": "./dist/extension.cjs",
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": true
+    },
+    "virtualWorkspaces": true
+  },
+  "contributes": {
+    "mcpServerDefinitionProviders": [
+      {
+        "id": "learn",
+        "label": "Learn API"
+      }
+    ],
+    "commands": [
+      {
+        "command": "learn.setApiKey",
+        "title": "Set API key",
+        "category": "Learn"
+      },
+      {
+        "command": "learn.removeApiKey",
+        "title": "Remove API key",
+        "category": "Learn"
+      },
+      {
+        "command": "learn.openQuickStart",
+        "title": "Open the quick start",
+        "category": "Learn"
+      },
+      {
+        "command": "learn.copyFirstTutorPrompt",
+        "title": "Copy the first-tutor prompt",
+        "category": "Learn"
+      }
+    ],
+    "configuration": {
+      "title": "Learn API",
+      "properties": {
+        "learn.apiBaseUrl": {
+          "type": "string",
+          "default": "https://developers-api.foreverlearning.ai/v1",
+          "enum": [
+            "https://developers-api.foreverlearning.ai/v1",
+            "https://developers-api-staging.foreverlearning.ai/v1"
+          ],
+          "enumItemLabels": [
+            "Production",
+            "Staging"
+          ],
+          "enumDescriptions": [
+            "The Learn API. Use this with your server key from the developer console.",
+            "ForeverLearning's staging host, for testing with a staging key only."
+          ],
+          "scope": "machine",
+          "markdownDescription": "The Learn API host the test turn uses. Your key must come from the same environment."
+        },
+        "learn.assignmentId": {
+          "type": "string",
+          "default": "",
+          "scope": "machine",
+          "markdownDescription": "Your Learn assignment id. Needed only if your key has more than one Learn assignment."
+        }
+      }
+    }
+  },
+  "files": [
+    "dist/**",
+    "media/icon.png",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "node scripts/build.mjs && node --test --test-concurrency=1 test/*.test.ts",
+    "vscode:prepublish": "node scripts/build.mjs",
+    "package": "vsce package --no-dependencies",
+    "inspect": "node scripts/inspect-vsix.mjs"
+  },
+  "devDependencies": {
+    "@foreverlearning/learn-mcp": "file:vendor/foreverlearning-learn-mcp-0.1.0.tgz",
+    "@modelcontextprotocol/client": "2.4.0",
+    "@modelcontextprotocol/server": "2.4.0",
+    "@types/node": "22.15.21",
+    "@types/vscode": "1.101.0",
+    "@vscode/vsce": "4.1.1",
+    "esbuild": "0.28.2",
+    "typescript": "7.0.2"
+  }
+}
