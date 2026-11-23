@@ -10,9 +10,11 @@
 // Then this script reads the profile's storage to show what VS Code cached for the server: the
 // handoff address and token, and no key.
 //
-// With FOREVERLEARNING_API_KEY and FOREVERLEARNING_BASE_URL in this script's environment (set by
-// a wrapper that unseals a key into one process, never typed), the server uses them ("own setup"),
-// and the no-confirm learn_test_turn makes only the free catalog read. No turn is ever sent.
+// With a key in this script's environment (FOREVERLEARNING_API_KEY and FOREVERLEARNING_BASE_URL, or
+// LEARN_API_KEY and LEARN_API_BASE as the staging key wrappers set them; unsealed into one process,
+// never typed), VS Code gets it as FOREVERLEARNING_API_KEY, the server uses it ("own setup"), and the
+// no-confirm learn_test_turn makes only the free catalog read. No turn is ever sent:
+//   & 'C:\dev\foreverlearning-crm\Terry\Tools\run-with-learn-staging-kits-key.ps1' node scripts/window-check.mjs
 import { spawn } from 'node:child_process';
 import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -26,7 +28,8 @@ const code = at > 0 ? process.argv[at + 1] : join(process.env.LOCALAPPDATA ?? ''
 if (!existsSync(code)) throw new Error('VS Code not found at ' + code);
 if (!existsSync(join(root, 'dist', 'extension.cjs'))) throw new Error('Build first: npm run build');
 
-const key = (process.env.FOREVERLEARNING_API_KEY ?? '').trim();
+const key = (process.env.FOREVERLEARNING_API_KEY || process.env.LEARN_API_KEY || '').trim();
+const keyBase = (process.env.FOREVERLEARNING_BASE_URL || process.env.LEARN_API_BASE || '').trim();
 const hide = (text) => (key ? String(text).split(key).join('<redacted-key>') : String(text));
 
 const base = mkdtempSync(join(tmpdir(), 'learn-window-'));
@@ -35,7 +38,7 @@ const work = join(base, 'work');
 mkdirSync(join(data, 'User'), { recursive: true });
 mkdirSync(work, { recursive: true });
 writeFileSync(join(data, 'User', 'settings.json'), JSON.stringify({
-  'learn.apiBaseUrl': process.env.FOREVERLEARNING_BASE_URL?.includes('staging') ? 'https://developers-api-staging.foreverlearning.ai/v1' : 'https://developers-api.foreverlearning.ai/v1',
+  'learn.apiBaseUrl': keyBase.includes('staging') ? 'https://developers-api-staging.foreverlearning.ai/v1' : 'https://developers-api.foreverlearning.ai/v1',
   'workbench.startupEditor': 'none',
   'telemetry.telemetryLevel': 'off',
   'update.mode': 'none',
@@ -47,6 +50,15 @@ const results = join(base, 'results.json');
 
 const env = { ...process.env, LEARN_WINDOW_RESULTS: results };
 delete env.ELECTRON_RUN_AS_NODE;
+delete env.LEARN_API_KEY;
+delete env.LEARN_API_BASE;
+delete env.FOREVERLEARNING_API_KEY;
+delete env.FOREVERLEARNING_BASE_URL;
+if (key) {
+  env.FOREVERLEARNING_API_KEY = key;
+  if (keyBase) env.FOREVERLEARNING_BASE_URL = keyBase;
+}
+console.log('window-check: ' + (key ? 'a key is in the window\'s environment (not shown); the server makes only the free catalog read' : 'no key: the server serves the docs only'));
 const started = Date.now();
 const child = spawn(code, [
   '--user-data-dir', data,
