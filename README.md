@@ -40,7 +40,7 @@ The app your assistant builds reads its own key from `FOREVERLEARNING_API_KEY` i
 
 ## Test turns: what they cost
 
-- **Test mode:** each test turn uses one of your workspace's 20 free test attempts. They last for the life of the workspace, are shared by all its keys, and never reset. A turn that fails after it is sent also uses one.
+- **Test mode:** each test turn uses one of your workspace's 50 free test attempts. They last for the life of the workspace, are shared by all its keys, and never reset. A turn that fails after it is sent also uses one.
 - **Live mode:** 5¢ per turn that succeeds, from your balance. A turn that fails costs nothing. The server refuses a live key unless you tell your assistant to use it.
 - **Before every turn**, your assistant shows you the cost and asks. VS Code also asks you to confirm in a dialog.
 - **At most 2 test turns** each time the server starts.

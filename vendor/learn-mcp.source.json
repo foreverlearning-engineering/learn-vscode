@@ -2,7 +2,7 @@
   "package": "@foreverlearning/learn-mcp",
   "version": "0.1.0",
   "file": "foreverlearning-learn-mcp-0.1.0.tgz",
-  "sha256": "43143d042152927dabafb502fb1ca96e9716b118eceb296cc6609c8c9160b0fd",
-  "commit": "6302ec1",
+  "sha256": "d67a4feb58842e47356b6b17a8bcfe43cc17ee3b421b678d86886be351a54afc",
+  "commit": "3fe846c",
   "how": "npm ci and npm pack (its prepack builds and runs its tests) in a clean clone at the commit. When the package is on npm, depend on the published version instead and delete this folder."
 }

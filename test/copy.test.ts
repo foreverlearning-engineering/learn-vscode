@@ -39,7 +39,7 @@ test('the price as the public copy says it', () => {
     assert.ok(!/five cents a turn|5¢ (a|per) turn(?! that succeeds)/i.test(text), name);
   }
   assert.match(texts['README.md'], /5¢ per turn that succeeds/);
-  assert.match(texts['README.md'], /20 free test attempts/);
+  assert.match(texts['README.md'], /50 free test attempts/);
 });
 
 test('the manifest is what the Marketplace needs', () => {
