@@ -125,7 +125,7 @@
     "inspect": "node scripts/inspect-vsix.mjs"
   },
   "devDependencies": {
-    "@foreverlearning/learn-mcp": "file:vendor/foreverlearning-learn-mcp-0.1.0.tgz",
+    "@foreverlearning/learn-mcp": "0.1.0",
     "@modelcontextprotocol/client": "2.4.0",
     "@modelcontextprotocol/server": "2.4.0",
     "@types/node": "22.15.21",

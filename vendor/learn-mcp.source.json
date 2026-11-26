@@ -1,8 +1,0 @@
-{
-    "package":  "@foreverlearning/learn-mcp",
-    "version":  "0.1.0",
-    "file":  "foreverlearning-learn-mcp-0.1.0.tgz",
-    "sha256":  "fea400fc11b74f47ef17cd185b61c07e6275eb0e8136a02818c6227890e1c57b",
-    "commit":  "fe29388",
-    "how":  "npm pack at learn-mcp tag hosted-docs-rc4 (fe29388; its prepack builds and runs the 15 tests) on 2026-11-26: the same build as the hosted rc4 docs and the npm tarball that publishes on launch day. When the package is on npm, depend on the published version instead and delete this folder."
-}

@@ -5,7 +5,6 @@
 //   dist/THIRD_PARTY_NOTICES.txt    the licenses of everything bundled
 // No source maps and no minification: what ships is readable.
 import { build } from 'esbuild';
-import { createHash } from 'node:crypto';
 import { cpSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -17,13 +16,7 @@ const fail = (message) => {
   process.exit(1);
 };
 
-// The vendored server package must be the one recorded (until it is published on npm).
-const source = join(root, 'vendor', 'learn-mcp.source.json');
-if (existsSync(source)) {
-  const record = JSON.parse(readFileSync(source, 'utf8'));
-  const sha = createHash('sha256').update(readFileSync(join(root, 'vendor', record.file))).digest('hex');
-  if (sha !== record.sha256) fail('vendor/' + record.file + ' does not match vendor/learn-mcp.source.json');
-}
+// The Learn server comes from the published package @foreverlearning/learn-mcp (devDependencies).
 const serverPackage = JSON.parse(readFileSync(join(root, 'node_modules', '@foreverlearning', 'learn-mcp', 'package.json'), 'utf8'));
 
 rmSync(dist, { recursive: true, force: true });
